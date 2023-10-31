@@ -1,0 +1,8 @@
+zh_CN:
+  js:
+    email_extension:
+      reply_via_email: "通过电子邮件回复该帖"
+  site_settings:
+    email_extension_enabled: "打开电子邮件扩展插件"
+    email_extension_reply_by_email_address: "(email_extension) 使用post id进行电子邮件回复的模板列表. 例如: p%{post_id}@reply.example.com|reply+p%{post_id}@example.com"
+    email_extension_topic_reply_subject_headers: "(email_extension) 被视为回复话题的前缀."

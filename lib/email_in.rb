@@ -4,9 +4,6 @@
 
 module ::Email
   class Receiver
-    class TopicNotUniqueError < ProcessingError
-    end
-
     def self.email_extension_reply_by_email_address_regex
       reply_addresses =
         SiteSetting
@@ -36,7 +33,8 @@ module ::Email
               next if c.blank?
               topics = Topic.where(title: c.strip)
               next if topics.empty?
-              raise TopicNotUniqueError if topics.size > 1
+              # We should replace it to another Error instead in feature
+              raise ReplyNotAllowedError if topics.size > 1
               post = Post.find_by(topic_id: topics[0].id, post_number: 1)
               return post if post
             end

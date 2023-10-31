@@ -1,7 +1,8 @@
 en:
   js:
-    discourse_plugin_name:
-      placeholder: placeholder
+    email_extension:
+      reply_via_email: "Reply via email"
   site_settings:
     email_extension_enabled: "Enable email_extension"
     email_extension_reply_by_email_address: "(email_extension) List of templates for replying with the incoming email address using post id. Example: p%{post_id}@reply.example.com|reply+p%{post_id}@example.com"
+    email_extension_topic_reply_subject_headers: "(email_extension) Prefix for automatic processing of replies."
