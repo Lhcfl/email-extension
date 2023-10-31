@@ -21,7 +21,7 @@ after_initialize do
 
   add_to_serializer(:post, :can_reply_via_email) do
     return false unless SiteSetting.email_in
-    if scope.user
+    if scope.user&.id
       return scope.can_create_post?(@topic)
     else
       # for private messages they do not have category
