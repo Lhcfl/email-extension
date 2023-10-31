@@ -2,3 +2,6 @@ en:
   js:
     discourse_plugin_name:
       placeholder: placeholder
+  site_settings:
+    email_extension_enabled: "Enable email_extension"
+    email_extension_reply_by_email_address: "(email_extension) List of templates for replying with the incoming email address using post id. Example: p%{post_id}@reply.example.com|reply+p%{post_id}@example.com"

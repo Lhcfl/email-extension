@@ -1,4 +1,8 @@
 plugins:
-  plugin_name_enabled:
+  email_extension_enabled:
     default: false
     client: true
+  email_extension_reply_by_email_address:
+    default: "reply+p%{post_id}@example.com"
+    client: true
+    type: list
