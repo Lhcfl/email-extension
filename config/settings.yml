@@ -6,3 +6,8 @@ plugins:
     default: "reply+p%{post_id}@example.com"
     client: true
     type: list
+  email_extension_topic_reply_subject_headers:
+    default: "Re:|RE:|re:|回复:|回复："
+    client: true
+    type: list
+  
