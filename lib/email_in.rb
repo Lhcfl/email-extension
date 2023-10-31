@@ -21,7 +21,8 @@ module ::Email
       end
     end
 
-    def self.email_extension_get_reply_to_post_by_subject(subject_str)
+    def self.email_extension_get_reply_to_post_by_subject(subject_str, category)
+      # Get topic by subject that start with "Re: "
       SiteSetting
         .email_extension_topic_reply_subject_headers
         .split("|")
@@ -31,17 +32,22 @@ module ::Email
           if match && match.captures
             match.captures.each do |c|
               next if c.blank?
-              topics = Topic.where(title: c.strip)
+              topics = Topic.where(title: c.strip, category_id: category.id)
               next if topics.empty?
-              # We should replace it to another Error instead in feature
-              raise ReplyNotAllowedError if topics.size > 1
+              return nil if topics.size > 1
               post = Post.find_by(topic_id: topics[0].id, post_number: 1)
               return post if post
             end
           end
         end
 
-      # return nil if not found
+      # Get topic by subject exactly the same as topic title
+      topics = Topic.where(title: subject_str.strip, category_id: category.id)
+      return nil if topics.size > 1
+      post = Post.find_by(topic_id: topics[0].id, post_number: 1)
+      return post if post
+
+      # return nil if still not found
       nil
     end
 
@@ -101,7 +107,7 @@ module ::Email
           raise InsufficientTrustLevelError
         end
 
-        post = Email::Receiver.email_extension_get_reply_to_post_by_subject(subject)
+        post = Email::Receiver.email_extension_get_reply_to_post_by_subject(subject, destination)
 
         if post
           create_reply(
