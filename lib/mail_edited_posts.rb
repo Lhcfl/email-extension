@@ -27,11 +27,13 @@ module ::EmailExtensionModule
   module EmailSenderPatch
     def send
       email_log = super
+      return email_log if email_log.instance_of? SkippedEmailLog
       post_id = header_value("X-Discourse-Post-Id")
       topic_id = header_value("X-Discourse-Topic-Id")
       return email_log unless post_id.present? && topic_id.present?
       post = Post.find_by(id: post_id, topic_id: topic_id)
-      email_log.latest_revision = post.revisions.length
+      email_log.latest_revision =
+        post.revisions.last && post.revisions.last.updated_at || DateTime.new
       email_log.save!
       email_log
     end
@@ -41,14 +43,12 @@ end
 class ::EmailLog
   def self.unique_email_per_post(post, user)
     return yield unless post && user
-    DistributedMutex.synchronize("email_log_#{post.id}_#{user.id}_#{post.revisions.length}") do
+    postrev = post.revisions.last && post.revisions.last.updated_at || DateTime.new
+    DistributedMutex.synchronize("email_log_#{post.id}_#{user.id}_#{postrev}") do
       log = self.where(post_id: post.id, user_id: user.id)
-      if log.exists? &&
-           (log[0].latest_revision >= post.revisions.length || !SiteSetting.mail_edited_posts)
-        nil
-      else
-        yield
-      end
+      return yield unless log.exists?
+      return unless SiteSetting.mail_edited_posts
+      yield if log[0].latest_revision < postrev
     end
   end
 end
