@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ::EmailExtensionModule
+module ::EmailExtensionModule::MailEditedPosts
   module NotificationPatch
     def mailing_list_notify(user, post)
       msg = super user, post
