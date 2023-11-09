@@ -11,6 +11,6 @@ plugins:
     client: true
     type: list
   edit_email_subject:
-    default: "[%{site_name}] [edit to #%{edit_post_id}]%{topic_title}"
+    default: "[%{site_name}] [edit to #%{edit_post_id}] %{topic_title}"
     client: false
 
