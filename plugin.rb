@@ -32,16 +32,15 @@ after_initialize do
     end
   end
 
-  if SiteSetting.mail_edited_posts
-    ::UserNotifications.prepend ::EmailExtensionModule::NotificationPatch
-    ::Email::Sender.prepend ::EmailExtensionModule::EmailSenderPatch
-    DiscourseEvent.on(:before_edit_post) do |post, args|
-      return if post.topic.private_message?
-      Jobs.enqueue_in(
-        SiteSetting.email_time_window_mins.minutes,
-        ::Jobs::NotifyMailingListSubscribersForEditedPosts,
-        post_id: post.id,
-      )
-    end
+  ::UserNotifications.prepend ::EmailExtensionModule::NotificationPatch
+  ::Email::Sender.prepend ::EmailExtensionModule::EmailSenderPatch
+  DiscourseEvent.on(:before_edit_post) do |post, args|
+    return if post.topic.private_message?
+    return unless SiteSetting.mail_edited_posts
+    Jobs.enqueue_in(
+      SiteSetting.email_time_window_mins.minutes,
+      ::Jobs::NotifyMailingListSubscribersForEditedPosts,
+      post_id: post.id,
+    )
   end
 end

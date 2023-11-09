@@ -43,7 +43,8 @@ class ::EmailLog
     return yield unless post && user
     DistributedMutex.synchronize("email_log_#{post.id}_#{user.id}_#{post.revisions.length}") do
       log = self.where(post_id: post.id, user_id: user.id)
-      if log.exists? && log[0].latest_revision >= post.revisions.length
+      if log.exists? &&
+           (log[0].latest_revision >= post.revisions.length || !SiteSetting.mail_edited_posts)
         nil
       else
         yield
