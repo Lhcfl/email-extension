@@ -18,7 +18,7 @@ require_relative "lib/email_extension_module/engine"
 after_initialize do
   # Code which should run after Rails has finished booting
   require_relative "lib/email_in"
-  require_relative "lib/mail_edit_posts"
+  require_relative "lib/mail_edited_posts"
 
   add_to_serializer(:post, :can_reply_via_email) do
     return false unless SiteSetting.email_in
@@ -32,14 +32,16 @@ after_initialize do
     end
   end
 
-  ::UserNotifications.prepend ::EmailExtensionModule::NotificationPatch
-  ::Email::Sender.prepend ::EmailExtensionModule::EmailSenderPatch
-  DiscourseEvent.on(:before_edit_post) do |post, args|
-    return if post.topic.private_message?
-    Jobs.enqueue_in(
-      SiteSetting.email_time_window_mins.minutes,
-      ::Jobs::NotifyMailingListSubscribersForEditedPosts,
-      post_id: post.id,
-    )
+  if SiteSetting.mail_edited_posts
+    ::UserNotifications.prepend ::EmailExtensionModule::NotificationPatch
+    ::Email::Sender.prepend ::EmailExtensionModule::EmailSenderPatch
+    DiscourseEvent.on(:before_edit_post) do |post, args|
+      return if post.topic.private_message?
+      Jobs.enqueue_in(
+        SiteSetting.email_time_window_mins.minutes,
+        ::Jobs::NotifyMailingListSubscribersForEditedPosts,
+        post_id: post.id,
+      )
+    end
   end
 end
