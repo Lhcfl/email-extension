@@ -30,4 +30,16 @@ after_initialize do
       true
     end
   end
+
+  ::UserNotifications.prepend ::EmailExtensionModule::MailEditedPosts::NotificationPatch
+  ::Email::Sender.prepend ::EmailExtensionModule::MailEditedPosts::EmailSenderPatch
+  DiscourseEvent.on(:before_edit_post) do |post, args|
+    return if post.topic.private_message?
+    return unless SiteSetting.mail_edited_posts
+    Jobs.enqueue_in(
+      SiteSetting.email_time_window_mins.minutes,
+      ::Jobs::EmailExtensionModule::NotifyMailingListSubscribersForEditedPosts,
+      post_id: post.id,
+    )
+  end
 end
