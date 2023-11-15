@@ -36,9 +36,13 @@ after_initialize do
   DiscourseEvent.on(:before_edit_post) do |post, args|
     return if post.topic.private_message?
     return unless SiteSetting.mail_edited_posts
+    DiscourseRedis::EvalHelper.new("redis.call('set', KEYS[1], 1)").eval(
+      Discourse.redis,
+      ["unmailed_edited_post_#{post.id}"],
+    )
     Jobs.enqueue_in(
       SiteSetting.email_time_window_mins.minutes,
-      ::Jobs::EmailExtensionModule::NotifyMailingListSubscribersForEditedPosts,
+      :notify_mailing_list_subscribers,
       post_id: post.id,
     )
   end
