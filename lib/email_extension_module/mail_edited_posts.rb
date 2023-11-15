@@ -4,24 +4,24 @@ module ::EmailExtensionModule::MailEditedPosts
   module NotificationPatch
     def mailing_list_notify(user, post)
       msg = super user, post
-      patch_edited_post_mail msg, user, post
+      mailing_edit =
+        DiscourseRedis::EvalHelper.new("return redis.call('get', KEYS[1])").eval(
+          Discourse.redis,
+          ["unmailed_edited_post_#{post.id}"],
+        )
+      return msg unless mailing_edit
+      DiscourseRedis::EvalHelper.new("redis.call('del', KEYS[1])").eval(
+        Discourse.redis,
+        ["unmailed_edited_post_#{post.id}"],
+      )
+      # Patch the subject
+      subject = String.new(SiteSetting.edit_email_subject)
+      subject.gsub!("%{site_name}", SiteSetting.title)
+      subject.gsub!("%{edit_post_id}", post.id.to_s)
+      subject.gsub!("%{topic_title}", post.topic.title) unless post.topic.nil?
+      msg.subject = subject
+      msg
     end
-
-    private
-
-    def patch_edited_post_mail(mail, user, post)
-      mail
-    end
-  end
-
-  def self.patch_edited_post_mail(mail, user, post)
-    # Patch the subject
-    subject = String.new(SiteSetting.edit_email_subject)
-    subject.gsub!("%{site_name}", SiteSetting.title)
-    subject.gsub!("%{edit_post_id}", post.id.to_s)
-    subject.gsub!("%{topic_title}", post.topic.title) unless post.topic.nil?
-    mail.subject = subject
-    mail
   end
 
   module EmailSenderPatch
