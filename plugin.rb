@@ -20,13 +20,13 @@ after_initialize do
   require_relative "lib/email_in"
 
   add_to_serializer(:post, :can_reply_via_email) do
-    return false unless SiteSetting.email_in
+    next false unless SiteSetting.email_in
     if scope.user&.id
-      return scope.can_create_post?(@topic)
+      next scope.can_create_post?(@topic)
     else
       # for private messages they do not have category
-      return false unless @topic&.category&.email_in_allow_strangers
-      return false if @topic.closed || @topic.archived
+      next false unless @topic&.category&.email_in_allow_strangers
+      next false if @topic.closed || @topic.archived
       true
     end
   end
@@ -34,8 +34,8 @@ after_initialize do
   ::UserNotifications.prepend ::EmailExtensionModule::MailEditedPosts::NotificationPatch
   ::Email::Sender.prepend ::EmailExtensionModule::MailEditedPosts::EmailSenderPatch
   DiscourseEvent.on(:before_edit_post) do |post, args|
-    return if post.topic.private_message?
-    return unless SiteSetting.mail_edited_posts
+    next if post.topic.private_message?
+    next unless SiteSetting.mail_edited_posts
     DiscourseRedis::EvalHelper.new("redis.call('set', KEYS[1], 1)").eval(
       Discourse.redis,
       ["unmailed_edited_post_#{post.id}"],
