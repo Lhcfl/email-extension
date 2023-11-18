@@ -16,4 +16,7 @@ plugins:
   mail_edited_posts:
     default: true
     client: true
+  email_include_details:
+    default: true
+    client: true
 
