@@ -8,4 +8,3 @@ zh_CN:
     email_extension_topic_reply_subject_headers: "(email_extension) 被视为回复话题的前缀."
     edit_email_subject: "为帖子的新版本发送的邮件的标题模板"
     mail_edited_posts: "是否在帖子被编辑后向邮件列表的订阅者发送邮件"
-    email_include_details: "是否在邮件中包含&lt;details&gt;中的内容"

@@ -15,13 +15,6 @@ end
 
 require_relative "lib/email_extension_module/engine"
 
-DiscourseEvent.on :after_plugin_activation do
-  Discourse
-    .plugins
-    .find { |p| p.path.end_with? "discourse-details/plugin.rb" }
-    .after_initialize { ::EmailExtensionModule::IncludeDetails.init }
-end
-
 after_initialize do
   # Code which should run after Rails has finished booting
   require_relative "lib/email_in"
@@ -40,8 +33,9 @@ after_initialize do
 
   ::UserNotifications.prepend ::EmailExtensionModule::MailEditedPosts::NotificationPatch
   ::Email::Sender.prepend ::EmailExtensionModule::MailEditedPosts::EmailSenderPatch
-  on(:before_edit_post) do |post, args|
+  DiscourseEvent.on(:before_edit_post) do |post, args|
     next if post.topic.private_message?
+    next unless SiteSetting.mail_edited_posts
     DiscourseRedis::EvalHelper.new("redis.call('set', KEYS[1], 1)").eval(
       Discourse.redis,
       ["unmailed_edited_post_#{post.id}"],
