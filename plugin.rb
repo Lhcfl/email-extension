@@ -15,14 +15,15 @@ end
 
 require_relative "lib/email_extension_module/engine"
 
-DiscourseEvent.on :after_plugin_activation do
-  Discourse
-    .plugins
-    .find { |p| p.path.end_with? "discourse-details/plugin.rb" }
-    .after_initialize { ::EmailExtensionModule::IncludeDetails.init }
-end
-
 after_initialize do
+
+  on :after_plugin_activation do
+    Discourse
+      .plugins
+      .find { |p| p.path.end_with? "discourse-details/plugin.rb" }
+      .after_initialize { ::EmailExtensionModule::IncludeDetails.init }
+  end
+
   # Code which should run after Rails has finished booting
   require_relative "lib/email_in"
 
