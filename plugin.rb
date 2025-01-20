@@ -16,7 +16,6 @@ end
 require_relative "lib/email_extension_module/engine"
 
 after_initialize do
-
   on :after_plugin_activation do
     Discourse
       .plugins
