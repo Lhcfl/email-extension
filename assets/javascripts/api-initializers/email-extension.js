@@ -2,7 +2,7 @@ import { apiInitializer } from "discourse/lib/api";
 import ReplyViaEmail from "../discourse/components/reply-via-email";
 
 export default apiInitializer("1.16.0", (api) => {
-  api.includePostAttributes("can_reply_via_email");
+  api.addTrackedPostProperties("can_reply_via_email");
 
   api.registerValueTransformer(
     "post-menu-buttons",
